@@ -1,5 +1,3 @@
 {
-	"castFiles": [
-		"demo.cast"
-	]
+	"castFiles": ["demo.cast"]
 }
