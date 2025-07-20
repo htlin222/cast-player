@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Cast Player</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/asciinema-player@3.0.1/dist/bundle/asciinema-player.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@4.5.0/index.css"
+    />
+    <style>
+      @font-face {
+        font-family: "JetBrainsMono Nerd Font";
+        src:
+          local("JetBrainsMono Nerd Font Mono"),
+          url("./nerdfonts-minimal/JetBrainsMonoNerdFontMono-Regular.ttf")
+            format("truetype");
+        font-stretch: normal;
+        font-style: normal;
+        font-weight: 400;
+      }
+
+      @font-face {
+        font-family: "Symbols Nerd Font";
+        src:
+          local("Symbols Nerd Font Mono"),
+          url("./nerdfonts-minimal/SymbolsNerdFontMono-Regular.ttf")
+            format("truetype");
+        font-stretch: normal;
+        font-style: normal;
+        font-weight: 400;
+      }
+    </style>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family:
+          "JetBrains Mono", "JetBrainsMono Nerd Font", "Fira Code",
+          "Cascadia Code", "Monaco", "Consolas", monospace;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: #1a1a1a;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+      .main-container {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 100px;
+        min-width: 100px;
+        background: #222;
+        border-right: 1px solid #444;
+        padding: 8px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex-shrink: 0;
+      }
+      .sidebar h3 {
+        font-size: 14px;
+        color: #fff;
+        margin-bottom: 10px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .file-list {
+        margin-bottom: 10px;
+      }
+      .file-button {
+        display: block;
+        width: 100%;
+        padding: 18px 6px;
+        margin-bottom: 6px;
+        background: #333;
+        border: 3px solid #555;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        transition: all 0.8s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-button:hover {
+        background: #444;
+        border-color: #666;
+      }
+      .file-button.active {
+        background: #0066cc;
+        border-color: #0066cc;
+        color: #fff;
+      }
+      .theme-section h3 {
+        margin-bottom: 10px;
+      }
+      .theme-selector select {
+        width: 100%;
+        padding: 6px 6px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 14px;
+      }
+      .speed-section {
+        margin-bottom: 20px;
+      }
+      .speed-section h3 {
+        margin-bottom: 10px;
+      }
+      .speed-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .speed-button {
+        flex: 1;
+        min-width: 40px;
+        padding: 8px 6px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        transition: all 0.8s ease;
+      }
+      .speed-button:hover {
+        background: #444;
+        border-color: #666;
+      }
+      .speed-button.active {
+        background: #0066cc;
+        border-color: #0066cc;
+        color: #fff;
+      }
+      .controls-section {
+        margin-top: 20px;
+      }
+      .controls-section h3 {
+        margin-bottom: 15px;
+      }
+      .play-pause-button {
+        width: 100%;
+        padding: 16px;
+        background: #0066cc;
+        border: 1px solid #0066cc;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .play-pause-button:hover {
+        background: #0052a3;
+        border-color: #0052a3;
+      }
+      .play-pause-button:disabled {
+        background: #555;
+        border-color: #555;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .content-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        width: calc(100vw - 100px);
+      }
+      .player-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1a1a1a;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+      #player {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        background: #1a1a1a;
+      }
+      #player * {
+        outline: none;
+      }
+      .asciinema-player {
+        outline: none !important;
+      }
+      /* Override asciinema player styles */
+      .asciinema-player-wrapper {
+        width: 100% !important;
+        max-height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .asciinema-player {
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+      .bottom-controls {
+        height: 50px;
+        min-height: 50px;
+        background: #222;
+        border-top: 1px solid #444;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        gap: 30px;
+        flex-shrink: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .control-group label {
+        font-size: 14px;
+        color: #ccc;
+        margin-right: 5px;
+        white-space: nowrap;
+      }
+      .bottom-speed-buttons {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .bottom-speed-button {
+        padding: 8px 10px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+      .bottom-speed-button:hover {
+        background: #444;
+        border-color: #666;
+      }
+      .bottom-speed-button.active {
+        background: #0066cc;
+        border-color: #0066cc;
+      }
+      .bottom-theme-select {
+        padding: 8px 14px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 14px;
+        min-width: 140px;
+      }
+      .bottom-play-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        background: #0066cc;
+        border: 1px solid #0066cc;
+        border-radius: 6px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+      .bottom-play-button:hover {
+        background: #0052a3;
+      }
+      .bottom-play-button.playing {
+        background: #ff8c00;
+        border-color: #ff8c00;
+      }
+      .bottom-play-button.playing:hover {
+        background: #e67c00;
+        border-color: #e67c00;
+      }
+      .bottom-play-button:disabled {
+        background: #555;
+        border-color: #555;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .font-size-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .font-size-button {
+        width: 36px;
+        height: 36px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .font-size-button:hover {
+        background: #444;
+        border-color: #666;
+      }
+      .font-size-display {
+        font-size: 14px;
+        color: #fff;
+        min-width: 20px;
+        text-align: center;
+      }
+      .terminal-size-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .terminal-size-button {
+        width: 36px;
+        height: 36px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .terminal-size-button:hover {
+        background: #444;
+        border-color: #666;
+      }
+      .terminal-size-display {
+        font-size: 14px;
+        color: #fff;
+        min-width: 20px;
+        text-align: center;
+      }
+      /* Catppuccin Latte Theme */
+      .asciinema-player-theme-latte {
+        /* Foreground (default text) color */
+        --term-color-foreground: #4c4f69 !important;
+
+        /* Background color */
+        --term-color-background: #eff1f5 !important;
+
+        /* Palette of 16 standard ANSI colors */
+        --term-color-0: #5c5f77 !important;
+        --term-color-1: #d20f39 !important;
+        --term-color-2: #40a02b !important;
+        --term-color-3: #df8e1d !important;
+        --term-color-4: #1e66f5 !important;
+        --term-color-5: #ea76cb !important;
+        --term-color-6: #179299 !important;
+        --term-color-7: #acb0be !important;
+        --term-color-8: #6c6f85 !important;
+        --term-color-9: #d20f39 !important;
+        --term-color-10: #40a02b !important;
+        --term-color-11: #df8e1d !important;
+        --term-color-12: #1e66f5 !important;
+        --term-color-13: #ea76cb !important;
+        --term-color-14: #179299 !important;
+        --term-color-15: #bcc0cc !important;
+      }
+
+      /* Additional selectors to ensure theme is applied */
+      .asciinema-player[data-theme="latte"],
+      .asciinema-player.asciinema-theme-latte {
+        --term-color-foreground: #4c4f69 !important;
+        --term-color-background: #eff1f5 !important;
+        --term-color-0: #5c5f77 !important;
+        --term-color-1: #d20f39 !important;
+        --term-color-2: #40a02b !important;
+        --term-color-3: #df8e1d !important;
+        --term-color-4: #1e66f5 !important;
+        --term-color-5: #ea76cb !important;
+        --term-color-6: #179299 !important;
+        --term-color-7: #acb0be !important;
+        --term-color-8: #6c6f85 !important;
+        --term-color-9: #d20f39 !important;
+        --term-color-10: #40a02b !important;
+        --term-color-11: #df8e1d !important;
+        --term-color-12: #1e66f5 !important;
+        --term-color-13: #ea76cb !important;
+        --term-color-14: #179299 !important;
+        --term-color-15: #bcc0cc !important;
+      }
+
+      /* Hover effect for terminal text */
+      #player div div pre span:hover {
+        background-color: #000011 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="sidebar">
+        <div class="file-list">
+          <div id="fileContainer">
+            <!-- File buttons will be generated here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="player-container">
+          <div id="player"></div>
+        </div>
+
+        <div class="bottom-controls">
+          <h5>Brought to you by Hsieh-Ting Lin 🦎 Ⓒ</h5>
+          <div class="control-group">
+            <div class="bottom-speed-buttons" id="bottomSpeedButtons">
+              <!-- Speed buttons will be generated here -->
+            </div>
+          </div>
+
+          <div class="control-group">
+            <select
+              id="bottomThemeSelect"
+              class="bottom-theme-select"
+              onchange="changeTheme()"
+            >
+              <option value="asciinema">asciinema</option>
+              <option value="tango">tango</option>
+              <option value="solarized-dark">solarized-dark</option>
+              <option value="solarized-light">solarized-light</option>
+              <option value="monokai">monokai</option>
+              <!-- <option value="latte">latte</option> -->
+            </select>
+          </div>
+
+          <div class="control-group">
+            <button
+              id="bottomPlayPauseButton"
+              class="bottom-play-button"
+              onclick="togglePlayPause()"
+              disabled
+            >
+              <span id="bottomPlayPauseText">Play</span>
+            </button>
+          </div>
+
+          <div class="control-group">
+            <label>Cols</label>
+            <span class="terminal-size-display" id="colsDisplay">135</span>
+            <div class="terminal-size-controls">
+              <button
+                class="terminal-size-button"
+                onclick="changeTerminalSize('cols', 'decrease')"
+              >
+                −
+              </button>
+              <button
+                class="terminal-size-button"
+                onclick="changeTerminalSize('cols', 'increase')"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Rows</label>
+            <span class="terminal-size-display" id="rowsDisplay">34</span>
+            <div class="terminal-size-controls">
+              <button
+                class="terminal-size-button"
+                onclick="changeTerminalSize('rows', 'decrease')"
+              >
+                −
+              </button>
+              <button
+                class="terminal-size-button"
+                onclick="changeTerminalSize('rows', 'increase')"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/asciinema-player@3.0.1/dist/bundle/asciinema-player.min.js"></script>
+    <script>
+      let currentPlayer = null;
+      let currentFile = null;
+      let currentTheme = "asciinema";
+      let currentSpeed = 1;
+      let isPlaying = false;
+      let currentFontSize = null; // Will be calculated automatically
+      let currentTerminalCols = 135;
+      let currentTerminalRows = 34;
+      let fileTimePositions = {}; // Track time position for each file
+
+      // Load cast files from JSON
+      fetch("./cast-files.json")
+        .then((response) => response.json())
+        .then((data) => {
+          const castFiles = data.castFiles;
+
+          // Populate file buttons
+          const fileContainer = document.getElementById("fileContainer");
+          castFiles.forEach((file, index) => {
+            const button = document.createElement("button");
+            button.className = "file-button";
+            button.textContent = file
+              .replace(/\.cast$/, "")
+              .replace(/^AML-omics-/, "");
+            button.onclick = () => loadCast(file, button);
+            fileContainer.appendChild(button);
+
+            // Auto-select first file
+            if (index === 0) {
+              loadCast(file, button);
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading cast files:", error);
+          // Fallback to hardcoded list
+          const castFiles = [
+            "AML-omics-part-01.cast",
+            "AML-omics-part-02.cast",
+            "AML-omics-part-03.cast",
+            "AML-omics-part-04.cast",
+            "AML-omics-part-05.cast",
+            "AML-omics-part-06.cast",
+            "AML-omics-part-07.cast",
+            "AML-omics-part-08.cast",
+            "AML-omics-part-09.cast",
+            "AML-omics-part-10.cast",
+            "AML-omics-part-11.cast",
+          ];
+
+          const fileContainer = document.getElementById("fileContainer");
+          castFiles.forEach((file, index) => {
+            const button = document.createElement("button");
+            button.className = "file-button";
+            button.textContent = file
+              .replace(/\.cast$/, "")
+              .replace(/^AML-omics-/, "");
+            button.onclick = () => loadCast(file, button);
+            fileContainer.appendChild(button);
+
+            // Auto-select first file
+            if (index === 0) {
+              loadCast(file, button);
+            }
+          });
+        });
+
+      // Populate speed buttons in bottom controls
+      const speedOptions = [
+        { value: 0.5, label: "0.5x" },
+        { value: 0.75, label: "0.75x" },
+        { value: 1, label: "1x" },
+        { value: 1.25, label: "1.25x" },
+        { value: 1.5, label: "1.5x" },
+        { value: 2, label: "2x" },
+        { value: 3, label: "3x" },
+        { value: 5, label: "5x" },
+      ];
+
+      const bottomSpeedContainer =
+        document.getElementById("bottomSpeedButtons");
+      speedOptions.forEach((speed) => {
+        const button = document.createElement("button");
+        button.className = "bottom-speed-button";
+        if (speed.value === 1) button.classList.add("active");
+        button.textContent = speed.label;
+        button.onclick = () => setSpeed(speed.value, button);
+        bottomSpeedContainer.appendChild(button);
+      });
+
+      function loadCast(selectedFile, buttonElement) {
+        // Clear any existing time update interval
+        if (currentPlayer && currentPlayer.timeUpdateInterval) {
+          clearInterval(currentPlayer.timeUpdateInterval);
+        }
+
+        currentFile = selectedFile;
+
+        // Update active button
+        document
+          .querySelectorAll(".file-button")
+          .forEach((btn) => btn.classList.remove("active"));
+        buttonElement.classList.add("active");
+
+        // Clear existing player
+        const playerDiv = document.getElementById("player");
+        playerDiv.innerHTML = "";
+
+        // Load fonts before creating player
+        Promise.all([
+          document.fonts.load("1em JetBrainsMono Nerd Font"),
+          document.fonts.load("1em Symbols Nerd Font"),
+        ]).then(() => {
+          // Calculate optimal font size based on container dimensions
+          const containerWidth = playerDiv.offsetWidth;
+          const containerHeight = playerDiv.offsetHeight;
+          const terminalCols = currentTerminalCols; // Current terminal width setting
+          const terminalRows = currentTerminalRows; // Current terminal height setting
+          const charWidth = 0.6; // Approximate character width ratio
+          const lineHeight = 1.2; // Line height multiplier
+
+          // Calculate font size to fit both width and height
+          const fontSizeByWidth = Math.floor(
+            (containerWidth - 20) / (terminalCols * charWidth),
+          );
+          const fontSizeByHeight = Math.floor(
+            (containerHeight - 20) / (terminalRows * lineHeight),
+          );
+          const optimalFontSize = Math.min(fontSizeByWidth, fontSizeByHeight);
+
+          const fontSize =
+            currentFontSize || Math.min(Math.max(optimalFontSize, 10), 28);
+
+          // Create new player
+          currentPlayer = AsciinemaPlayer.create(selectedFile, playerDiv, {
+            autoplay: false,
+            loop: false,
+            theme: currentTheme,
+            poster: "npt:0:00",
+            fit: "width",
+            controls: "auto",
+            fontSize: fontSize + "px",
+            speed: currentSpeed,
+            terminalFontFamily:
+              "'JetBrainsMono Nerd Font', 'Symbols Nerd Font', monospace",
+            cols: terminalCols,
+            rows: terminalRows,
+          });
+
+          // Make player focusable and add tabindex
+          setTimeout(() => {
+            const playerElement = document.querySelector(".asciinema-player");
+            if (playerElement) {
+              playerElement.setAttribute("tabindex", "0");
+              playerElement.style.outline = "none";
+            }
+          }, 100);
+
+          // Reset playing state
+          isPlaying = false;
+
+          // Enable play/pause button immediately
+          document.getElementById("bottomPlayPauseButton").disabled = false;
+
+          // Update font size if it was calculated automatically
+          if (!currentFontSize) {
+            currentFontSize = fontSize;
+            document.getElementById("fontSizeDisplay").textContent =
+              fontSize + "px";
+          }
+
+          // Event listeners for tracking playback using official API events
+          currentPlayer.addEventListener("playing", () => {
+            console.log("Player playing event fired");
+            isPlaying = true;
+            updatePlayPauseButton();
+          });
+
+          currentPlayer.addEventListener("pause", () => {
+            console.log("Player pause event fired");
+            isPlaying = false;
+            updatePlayPauseButton();
+            // Update time position when paused
+            updateCurrentTimePosition();
+          });
+
+          currentPlayer.addEventListener("ended", () => {
+            console.log("Player ended event fired");
+            isPlaying = false;
+            updatePlayPauseButton();
+            // Reset time position when ended
+            fileTimePositions[currentFile] = 0;
+          });
+
+          // Periodically update time position while playing
+          const timeUpdateInterval = setInterval(() => {
+            if (currentPlayer && isPlaying && currentFile) {
+              updateCurrentTimePosition();
+            }
+          }, 1000);
+
+          // Store interval ID to clear it later
+          currentPlayer.timeUpdateInterval = timeUpdateInterval;
+
+          // Update button state immediately
+          updatePlayPauseButton();
+
+          // Restore previous time and playing state if available
+          setTimeout(() => {
+            // Use tracked time position for this file if available
+            const savedTime =
+              window.pendingSeekTime !== undefined
+                ? window.pendingSeekTime
+                : fileTimePositions[currentFile] || 0;
+
+            if (savedTime > 0) {
+              try {
+                currentPlayer.seek(savedTime);
+                console.log("Restored playback time to:", savedTime);
+                // Update our tracking
+                fileTimePositions[currentFile] = savedTime;
+              } catch (error) {
+                console.log("Could not seek to saved time:", error);
+              }
+            }
+
+            if (window.pendingPlayState === true) {
+              try {
+                currentPlayer.play();
+                isPlaying = true;
+                console.log("Restored playing state");
+              } catch (error) {
+                console.log("Could not restore playing state:", error);
+              }
+              window.pendingPlayState = undefined;
+            }
+
+            // Clear pending values
+            window.pendingSeekTime = undefined;
+            updatePlayPauseButton();
+          }, 300);
+        });
+      }
+
+      // Function to get current time like seekBackward does
+      function getCurrentPlayerTime() {
+        if (currentPlayer && currentPlayer.getCurrentTime) {
+          try {
+            return currentPlayer.getCurrentTime();
+          } catch (error) {
+            console.log("Error getting current time:", error);
+            return fileTimePositions[currentFile] || 0;
+          }
+        }
+        return fileTimePositions[currentFile] || 0;
+      }
+
+      // Function to update tracked time position
+      function updateCurrentTimePosition() {
+        if (currentFile && currentPlayer) {
+          const currentTime = getCurrentPlayerTime();
+          fileTimePositions[currentFile] = currentTime;
+          console.log(`Updated time for ${currentFile}:`, currentTime);
+        }
+      }
+
+      // Helper function to preserve time and state when reloading player
+      function reloadPlayerWithSettings() {
+        if (currentFile && currentPlayer) {
+          // Update the current time position before reloading
+          updateCurrentTimePosition();
+
+          let currentTime = fileTimePositions[currentFile] || 0;
+          let wasPlaying = isPlaying;
+
+          const activeButton = document.querySelector(".file-button.active");
+          if (activeButton) {
+            // Store the time and playing state for restoration after reload
+            window.pendingSeekTime = currentTime;
+            window.pendingPlayState = wasPlaying;
+            console.log(
+              "Storing time for restoration:",
+              currentTime,
+              "playing:",
+              wasPlaying,
+            );
+            loadCast(currentFile, activeButton);
+          }
+        }
+      }
+
+      function changeTheme() {
+        currentTheme = document.getElementById("bottomThemeSelect").value;
+
+        // If a cast is currently loaded, reload it with the new theme
+        if (currentFile) {
+          reloadPlayerWithSettings();
+        }
+      }
+
+      function setSpeed(speed, buttonElement) {
+        currentSpeed = speed;
+
+        // Update active speed button
+        document
+          .querySelectorAll(".bottom-speed-button")
+          .forEach((btn) => btn.classList.remove("active"));
+        buttonElement.classList.add("active");
+
+        // If a cast is currently loaded, preserve current time and reload
+        if (currentFile) {
+          reloadPlayerWithSettings();
+        }
+      }
+
+      function togglePlayPause() {
+        console.log("togglePlayPause called, current state:", isPlaying);
+
+        if (!currentPlayer) {
+          console.log("No current player available");
+          return;
+        }
+
+        // Try the player API first
+        try {
+          if (isPlaying) {
+            console.log("Calling currentPlayer.pause()");
+            currentPlayer.pause();
+          } else {
+            console.log("Calling currentPlayer.play()");
+            currentPlayer.play();
+          }
+
+          // Update state immediately
+          isPlaying = !isPlaying;
+          updatePlayPauseButton();
+          console.log("State updated to:", isPlaying);
+        } catch (error) {
+          console.log("Player API failed, trying spacebar method:", error);
+
+          // Fallback to spacebar simulation
+          const playerEl = document.querySelector(".asciinema-player");
+          if (playerEl) {
+            playerEl.focus();
+
+            // Create spacebar event
+            const event = new Event("keydown");
+            event.key = " ";
+            event.code = "Space";
+            event.keyCode = 32;
+
+            playerEl.dispatchEvent(event);
+
+            // Update state manually
+            isPlaying = !isPlaying;
+            updatePlayPauseButton();
+            console.log("Fallback: State updated to:", isPlaying);
+          }
+        }
+      }
+
+      function updatePlayPauseButton() {
+        const button = document.getElementById("bottomPlayPauseButton");
+        const text = document.getElementById("bottomPlayPauseText");
+
+        if (isPlaying) {
+          text.textContent = "Pause";
+          button.classList.add("playing");
+        } else {
+          text.textContent = "Play";
+          button.classList.remove("playing");
+        }
+      }
+
+      // Keyboard controls
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "j" || event.key === "J") {
+          event.preventDefault();
+          togglePlayPause();
+        } else if (event.key === "h" || event.key === "H") {
+          event.preventDefault();
+          seekBackward();
+        } else if (event.key === "l" || event.key === "L") {
+          event.preventDefault();
+          seekForward();
+        }
+      });
+
+      function seekBackward() {
+        if (currentPlayer && currentPlayer.getCurrentTime) {
+          try {
+            const currentTime = currentPlayer.getCurrentTime();
+            const newTime = Math.max(0, currentTime - 3);
+            currentPlayer.seek(newTime);
+            // Update our tracking
+            if (currentFile) {
+              fileTimePositions[currentFile] = newTime;
+            }
+          } catch (error) {
+            console.log("Seek backward error:", error);
+            // Fallback: simulate left arrow key
+            const playerEl = document.querySelector(".asciinema-player");
+            if (playerEl) {
+              playerEl.dispatchEvent(
+                new KeyboardEvent("keydown", {
+                  key: "ArrowLeft",
+                  code: "ArrowLeft",
+                  bubbles: true,
+                }),
+              );
+            }
+          }
+        }
+      }
+
+      function seekForward() {
+        if (currentPlayer && currentPlayer.getCurrentTime) {
+          try {
+            const currentTime = currentPlayer.getCurrentTime();
+            const duration = currentPlayer.getDuration();
+            const newTime = Math.min(duration, currentTime + 3);
+            currentPlayer.seek(newTime);
+            // Update our tracking
+            if (currentFile) {
+              fileTimePositions[currentFile] = newTime;
+            }
+          } catch (error) {
+            console.log("Seek forward error:", error);
+            // Fallback: simulate right arrow key
+            const playerEl = document.querySelector(".asciinema-player");
+            if (playerEl) {
+              playerEl.dispatchEvent(
+                new KeyboardEvent("keydown", {
+                  key: "ArrowRight",
+                  code: "ArrowRight",
+                  bubbles: true,
+                }),
+              );
+            }
+          }
+        }
+      }
+
+      function changeFontSize(direction) {
+        if (!currentFontSize) currentFontSize = 14; // fallback
+
+        if (direction === "increase") {
+          currentFontSize = Math.min(currentFontSize + 2, 30);
+        } else {
+          currentFontSize = Math.max(currentFontSize - 2, 8);
+        }
+
+        // Update display
+        document.getElementById("fontSizeDisplay").textContent =
+          currentFontSize + "px";
+
+        // If a cast is currently loaded, reload it with the new font size
+        if (currentFile) {
+          reloadPlayerWithSettings();
+        }
+      }
+
+      function changeTerminalSize(type, direction) {
+        if (type === "cols") {
+          if (direction === "increase") {
+            currentTerminalCols = Math.min(currentTerminalCols + 5, 200);
+          } else {
+            currentTerminalCols = Math.max(currentTerminalCols - 5, 50);
+          }
+          // Update display
+          document.getElementById("colsDisplay").textContent =
+            currentTerminalCols;
+        } else if (type === "rows") {
+          if (direction === "increase") {
+            currentTerminalRows = Math.min(currentTerminalRows + 2, 60);
+          } else {
+            currentTerminalRows = Math.max(currentTerminalRows - 2, 10);
+          }
+          // Update display
+          document.getElementById("rowsDisplay").textContent =
+            currentTerminalRows;
+        }
+
+        // If a cast is currently loaded, reload it with the new terminal size
+        if (currentFile) {
+          reloadPlayerWithSettings();
+        }
+      }
+    </script>
+  </body>
+</html>
