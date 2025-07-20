@@ -1,10 +1,9 @@
-# AML-Omics Cast Player
+# Asciinema Cast Player
 
-A web-based terminal recording player for viewing AML (Acute Myeloid Leukemia) multi-omics analysis pipeline demonstrations. Built with asciinema player and featuring a modern, customizable interface.
+A web-based terminal recording player for analysis pipeline demonstrations. Built with asciinema player and featuring a modern, customizable interface.
 
-## Features
+## Features 
 
-- **Multiple Cast Files**: 12 recordings showing different parts of the AML-omics analysis pipeline
 - **Playback Controls**: Play/pause, speed adjustment (0.5x to 5x), seek forward/backward
 - **Theme Selection**: Multiple terminal themes (asciinema, tango, solarized, monokai)
 - **Terminal Customization**: Adjustable terminal size (columns/rows)
@@ -46,24 +45,6 @@ open http://localhost:8000/player.html
 2. Right-click on `player.html`
 3. Select "Open with Live Server"
 
-## Cast Files
-
-The player includes 12 recordings demonstrating the AML-omics pipeline:
-
-| File             | Description                           | Size   |
-| ---------------- | ------------------------------------- | ------ |
-| `part-01.cast`   | Environment setup and data download   | 15 MB  |
-| `part-02.cast`   | Data preprocessing                    | 19 MB  |
-| `part-03.cast`   | Quality control and feature selection | 59 MB  |
-| `part-04.cast`   | Multi-omics integration               | 23 MB  |
-| `part-05.cast`   | Unsupervised clustering               | 16 MB  |
-| `part-06.cast`   | Clinical validation                   | 7.8 MB |
-| `part-07.cast`   | Pathway analysis                      | 14 MB  |
-| `part-08.cast`   | Drug sensitivity prediction           | 2.9 MB |
-| `part-09.cast`   | Visualization generation              | 15 MB  |
-| `part-10.cast`   | Report generation                     | 9.9 MB |
-| `part-11.cast`   | Complete pipeline run                 | 11 MB  |
-| `part-test.cast` | Test recording                        | 13 KB  |
 
 ## File Structure
 
@@ -120,20 +101,6 @@ You can modify the appearance by editing the CSS in `player.html`:
 - **Layout**: Modify the grid and flexbox layouts
 - **Themes**: Add new terminal themes in the theme selector
 - **Fonts**: Replace font files in the `nerdfonts-minimal/` directory
-
-## About AML-Omics Pipeline
-
-This cast player demonstrates a comprehensive AML (Acute Myeloid Leukemia) multi-omics analysis pipeline that:
-
-1. Downloads TCGA-LAML data
-2. Performs quality control and preprocessing
-3. Integrates multiple omics data types (RNA-seq, methylation, mutations)
-4. Identifies patient subtypes using unsupervised clustering
-5. Validates findings with clinical data
-6. Performs pathway enrichment analysis
-7. Predicts drug sensitivity
-
-The pipeline uses advanced bioinformatics tools including MOFA2 for multi-omics integration, consensus clustering for robust subtype identification, and comprehensive survival analysis for clinical validation.
 
 ## Credits
 
