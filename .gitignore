@@ -193,11 +193,12 @@ temp/
 *.7z
 
 # Media files (uncomment if needed)
-# *.mp4
-# *.mp3
-# *.mov
-# *.avi
+*.mp4
+*.mp3
+*.mov
+*.cast
 
 # Custom build directories
 _site/
 .publish/
+cast-files.json
