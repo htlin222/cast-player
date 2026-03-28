@@ -1,3 +1,7 @@
+![GitHub stars](https://img.shields.io/github/stars/htlin222/cast-player?style=flat-square)
+![Last commit](https://img.shields.io/github/last-commit/htlin222/cast-player?style=flat-square)
+![License](https://img.shields.io/github/license/htlin222/cast-player?style=flat-square)
+
 # Asciinema Cast Player
 
 A web-based terminal recording player for analysis pipeline demonstrations. Built with asciinema player and featuring a modern, customizable interface.
